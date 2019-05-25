@@ -91,7 +91,7 @@ class Dish extends \yii\db\ActiveRecord
                     ->andWhere(['ingredient_id' => $ingredients])
                     ->groupBy('dish_id');
 
-                $baseQuery = self::find()
+                $fullOverlap = self::find()
                     ->select(['dish.id', 'dish.name', 'count' => $sub])
                     ->joinWith('dishToIngredients')
                     ->innerJoin('ingredient', 'ingredient.id = dish_to_ingredient.ingredient_id')
@@ -99,14 +99,23 @@ class Dish extends \yii\db\ActiveRecord
                     ->andHaving(['AVG(`ingredient`.`visible`)' => 1])
                     ->orderBy(['count' => SORT_DESC])
                     ->groupBy('id')
-                    ->asArray();
+                    ->asArray()
+                    ->andHaving(['count' => $ingredientsCount])
+                    ->andHaving(['AVG(`ingredient`.`visible`)' => 1])
+                    ->all();
 
-                $fullOverlap = $baseQuery->andHaving(['count' => $ingredientsCount])->andHaving(['AVG(`ingredient`.`visible`)' => 1])->all();
-
-                if(!empty($full)) {
+                if(!empty($fullOverlap)) {
                     return $fullOverlap;
                 } else {
-                    $partialOverlap = $baseQuery->andHaving(['<', 'count', $ingredientsCount])
+                    $partialOverlap = self::find()
+                        ->select(['dish.id', 'dish.name', 'count' => $sub])
+                        ->joinWith('dishToIngredients')
+                        ->innerJoin('ingredient', 'ingredient.id = dish_to_ingredient.ingredient_id')
+                        ->andWhere(['dish_to_ingredient.ingredient_id' => $ingredients])
+                        ->andHaving(['AVG(`ingredient`.`visible`)' => 1])
+                        ->orderBy(['count' => SORT_DESC])
+                        ->groupBy('id')
+                        ->asArray()->andHaving(['<', 'count', $ingredientsCount])
                         ->andHaving(['>=', 'count', self::MIN_COUNT_INGREDIENTS])
                         ->all();
                     return $partialOverlap;
