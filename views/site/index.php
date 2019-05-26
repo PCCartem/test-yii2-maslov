@@ -10,9 +10,10 @@ $this->title = 'My Yii Application';
 $url = \yii\helpers\Url::to(['ingredient/ingredient-list']);
 $error = null;
 
-if(empty($dishes)) {
+if($dishes === false) {
     $error = "Ничего не найдено";
 }
+
 if(!empty($ingredients) && count($ingredients) < 2) {
     $error = "Выберите больше ингредиентов";
 }
@@ -33,9 +34,11 @@ echo "</br>".Html::submitButton('Искать', ['class' => 'btn btn-success']);
 ActiveForm::end();
 
 if(is_null($error)) {
-    echo "<h2>Найденные блюда</h2>";
-    foreach ($dishes as $dish) {
-        echo "<p>".$dish['name']."</p>";
+    if($dishes !== NULL) {
+        echo "<h2>Найденные блюда</h2>";
+        foreach ($dishes as $dish) {
+            echo "<p>".$dish['name']."</p>";
+        }
     }
 } else {
     echo "<p class='error-summary'>$error</p>";

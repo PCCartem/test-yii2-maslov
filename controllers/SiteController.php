@@ -63,12 +63,17 @@ class SiteController extends Controller
     public function actionIndex()
     {
         $ingredients = Yii::$app->request->post('ingredients');
-        $dish = Dish::search($ingredients);
+        if(Yii::$app->request->isPost) {
+            $dishes = Dish::search($ingredients);
+        } else {
+            $dishes = NULL;
+        }
+
 
         return $this->render('index', [
             'data' => Ingredient::getDataForMultiselect(),
             'ingredients' => $ingredients,
-            'dishes' => $dish,
+            'dishes' => $dishes,
         ]);
     }
 

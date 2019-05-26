@@ -88,13 +88,7 @@ class DishController extends Controller
 
         if ($model->load(Yii::$app->request->post())) {
             $ingredients = Yii::$app->request->post('ingredients');
-            if (!empty($ingredients)) {
-                $model->save();
-                $model->associate(Yii::$app->request->post('ingredients'));
-                return $this->redirect(['view', 'id' => $model->id]);
-            } else {
-                $error = "Выбирите хотя бы один ингредиент для блюда";
-            }
+            $this->relationForIngredients($ingredients, $model, $error);
         }
 
         return $this->render('create', [
@@ -118,13 +112,7 @@ class DishController extends Controller
 
         if ($model->load(Yii::$app->request->post())) {
             $ingredients = Yii::$app->request->post('ingredients');
-            if (!empty($ingredients)) {
-                $model->save();
-                $model->associate(Yii::$app->request->post('ingredients'));
-                return $this->redirect(['view', 'id' => $model->id]);
-            } else {
-                $error = "Выбирите хотя бы один ингредиент для блюда";
-            }
+            $this->relationForIngredients($ingredients, $model, $error);
         }
 
         $ingredients = [];
@@ -168,5 +156,16 @@ class DishController extends Controller
         }
 
         throw new NotFoundHttpException('The requested page does not exist.');
+    }
+
+    protected function relationForIngredients($ingredients, $model, &$error) {
+
+        if (!empty($ingredients)) {
+            $model->save();
+            $model->associate(Yii::$app->request->post('ingredients'));
+            return $this->redirect(['view', 'id' => $model->id]);
+        } else {
+            return $error = "Выбирите хотя бы один ингредиент для блюда";
+        }
     }
 }

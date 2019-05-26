@@ -85,46 +85,67 @@ class Dish extends \yii\db\ActiveRecord
         if(!empty($ingredients)) {
             $ingredientsCount = count($ingredients);
             if($ingredientsCount >= self::MIN_COUNT_INGREDIENTS) {
-                $sub = DishToIngredient::find()
-                    ->select('COUNT(*)')
-                    ->where("`dish_to_ingredient`.`dish_id`=`dish`.`id`")
-                    ->andWhere(['ingredient_id' => $ingredients])
-                    ->groupBy('dish_id');
-
-                $fullOverlap = self::find()
-                    ->select(['dish.id', 'dish.name', 'count' => $sub])
-                    ->joinWith('dishToIngredients')
-                    ->innerJoin('ingredient', 'ingredient.id = dish_to_ingredient.ingredient_id')
-                    ->andWhere(['dish_to_ingredient.ingredient_id' => $ingredients])
-                    ->andHaving(['AVG(`ingredient`.`visible`)' => 1])
-                    ->orderBy(['count' => SORT_DESC])
-                    ->groupBy('id')
-                    ->asArray()
-                    ->andHaving(['count' => $ingredientsCount])
-                    ->andHaving(['AVG(`ingredient`.`visible`)' => 1])
-                    ->all();
-
+                $fullOverlap = self::getResultFullOverlapSearch($ingredients);
                 if(!empty($fullOverlap)) {
                     return $fullOverlap;
                 } else {
-                    $partialOverlap = self::find()
-                        ->select(['dish.id', 'dish.name', 'count' => $sub])
-                        ->joinWith('dishToIngredients')
-                        ->innerJoin('ingredient', 'ingredient.id = dish_to_ingredient.ingredient_id')
-                        ->andWhere(['dish_to_ingredient.ingredient_id' => $ingredients])
-                        ->andHaving(['AVG(`ingredient`.`visible`)' => 1])
-                        ->orderBy(['count' => SORT_DESC])
-                        ->groupBy('id')
-                        ->asArray()->andHaving(['<', 'count', $ingredientsCount])
-                        ->andHaving(['>=', 'count', self::MIN_COUNT_INGREDIENTS])
-                        ->all();
-                    return $partialOverlap;
+                    return self::getResultPartialOverlapSearch();
                 }
             }
         } else {
             return false;
         }
 
+    }
+
+    /**
+     * @param $ingredients
+     * @return array|\yii\db\ActiveRecord[]
+     */
+    protected static function getResultFullOverlapSearch($ingredients) {
+        return $fullOverlap = self::find()
+            ->select(['dish.id', 'dish.name', 'count' => self::getSearchSubQuery($ingredients)])
+            ->joinWith('dishToIngredients')
+            ->innerJoin('ingredient', 'ingredient.id = dish_to_ingredient.ingredient_id')
+            ->andWhere(['dish_to_ingredient.ingredient_id' => $ingredients])
+            ->andHaving(['AVG(`ingredient`.`visible`)' => 1])
+            ->orderBy(['count' => SORT_DESC])
+            ->groupBy('id')
+            ->asArray()
+            ->andHaving(['count' => count($ingredients)])
+            ->andHaving(['AVG(`ingredient`.`visible`)' => 1])
+            ->all();
+    }
+
+    /**
+     * @param $ingredients
+     * @return array|\yii\db\ActiveRecord[]
+     */
+    protected static function getResultPartialOverlapSearch($ingredients) {
+        return $fullOverlap = self::find()
+            ->select(['dish.id', 'dish.name', 'count' => self::getSearchSubQuery($ingredients)])
+            ->joinWith('dishToIngredients')
+            ->innerJoin('ingredient', 'ingredient.id = dish_to_ingredient.ingredient_id')
+            ->andWhere(['dish_to_ingredient.ingredient_id' => $ingredients])
+            ->andHaving(['AVG(`ingredient`.`visible`)' => 1])
+            ->orderBy(['count' => SORT_DESC])
+            ->groupBy('id')
+            ->asArray()
+            ->andHaving(['count' => count($ingredients)])
+            ->andHaving(['AVG(`ingredient`.`visible`)' => 1])
+            ->all();
+    }
+
+    /**
+     * @param $ingredients
+     * @return \yii\db\ActiveQuery
+     */
+    protected static function getSearchSubQuery($ingredients) {
+        return DishToIngredient::find()
+            ->select('COUNT(*)')
+            ->where("`dish_to_ingredient`.`dish_id`=`dish`.`id`")
+            ->andWhere(['ingredient_id' => $ingredients])
+            ->groupBy('dish_id');
     }
 
 
