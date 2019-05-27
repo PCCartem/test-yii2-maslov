@@ -13,7 +13,10 @@ $this->params['breadcrumbs'][] = 'Update';
 <div class="dish-update">
 
     <h1><?= Html::encode($this->title) ?></h1>
-    <p class="error-summary"><?= Html::encode($error) ?></p>
+    <?php if(!empty($error)) { ?>
+        <p class="error-summary"><?= Html::encode($error) ?></p>
+    <?php } ?>
+
 
     <?= $this->render('_form', [
         'model' => $model,
