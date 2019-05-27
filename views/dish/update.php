@@ -4,6 +4,7 @@ use yii\helpers\Html;
 
 /* @var $this yii\web\View */
 /* @var $model app\models\Dish */
+/* @var $ingredients array */
 
 $this->title = 'Update Dish: ' . $model->name;
 $this->params['breadcrumbs'][] = ['label' => 'Dishes', 'url' => ['index']];

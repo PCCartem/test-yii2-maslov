@@ -5,6 +5,7 @@ use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 
 /* @var $this yii\web\View */
+/* @var $dishes \app\models\Dish */
 
 $this->title = 'My Yii Application';
 $url = \yii\helpers\Url::to(['ingredient/ingredient-list']);
@@ -17,7 +18,6 @@ if ($dishes === false) {
 if (!empty($ingredients) && count($ingredients) < 2) {
     $error = "Выберите больше ингредиентов";
 }
-
 
 $form = ActiveForm::begin();
 echo Select2::widget([
