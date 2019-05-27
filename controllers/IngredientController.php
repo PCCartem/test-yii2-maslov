@@ -140,7 +140,14 @@ class IngredientController extends Controller
         throw new NotFoundHttpException('The requested page does not exist.');
     }
 
-    public function actionIngredientList($q = null, $id = null) {
+    /**
+     *
+     * @param null $q
+     * @param null $id
+     * @return array
+     * @throws \yii\db\Exception
+     */
+    public function actionIngredientList($q = null) {
         \Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
         $out = ['results' => ['id' => '', 'text' => '']];
         if (!is_null($q)) {
@@ -151,9 +158,6 @@ class IngredientController extends Controller
             $command = $query->createCommand();
             $data = $command->queryAll();
             $out['results'] = array_values($data);
-        }
-        elseif ($id > 0) {
-            $out['results'] = ['id' => $id, 'text' => City::find($id)->name];
         }
         return $out;
     }

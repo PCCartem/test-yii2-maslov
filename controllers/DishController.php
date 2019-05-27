@@ -108,7 +108,7 @@ class DishController extends Controller
     public function actionUpdate($id)
     {
         $model = $this->findModel($id);
-
+        $error = NULL;
 
         if ($model->load(Yii::$app->request->post())) {
             $ingredients = Yii::$app->request->post('ingredients');
@@ -158,6 +158,13 @@ class DishController extends Controller
         throw new NotFoundHttpException('The requested page does not exist.');
     }
 
+    /**
+     * Creating an association between dishes and ingredients and preserving dishes
+     * @param $ingredients
+     * @param $model
+     * @param $error
+     * @return string|\yii\web\Response
+     */
     protected function relationForIngredients($ingredients, $model, &$error) {
 
         if (!empty($ingredients)) {
