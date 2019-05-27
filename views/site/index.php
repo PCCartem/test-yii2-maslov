@@ -33,7 +33,7 @@ echo Select2::widget([
 echo "</br>" . Html::submitButton('Искать', ['class' => 'btn btn-success']);
 ActiveForm::end();
 
-if ($dishes !== NULL) {
+if ($dishes !== NULL && is_null($error)) {
     echo "<h2>Найденные блюда</h2>";
     foreach ($dishes as $dish) {
         echo "<p>" . $dish['name'] . "</p>";
